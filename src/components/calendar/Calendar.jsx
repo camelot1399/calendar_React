@@ -156,6 +156,10 @@ export const Calendar = ({rangeMode}) => {
 	}
 
 	const handleData = async (e) => {
+
+		if (currentYear !== e.year || currentMonth !== e.month) {
+			return false;
+		}
 		
 		if (rangeMode) {
 			handleRange(e);
