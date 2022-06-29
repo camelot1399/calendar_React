@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
+import { GrFormNext, GrFormPrevious } from 'react-icons/gr';
 
 import style from './calendar.module.scss';
 
@@ -73,7 +74,6 @@ export const Calendar = () => {
 
 	const daysListComponent = async () => {
 		const days = getDays(currentYear, currentMonth);
-		console.log('days', days);
 		let daysArray = [];
 
 		const countDaysCurrentMonth = new Date(currentYear, currentMonth, 1).getDay();
@@ -83,7 +83,8 @@ export const Calendar = () => {
 				daysArray.push({
 					day: i,
 					month,
-					year: currentYear
+					year: currentYear,
+					disabled: month !== currentMonth ? 'true' : 'false'
 				});
 			}
 		}
@@ -109,7 +110,6 @@ export const Calendar = () => {
 	}
 
 	const handleData = (e) => {
-		console.log('e', e);
 		setActiveData(e);
 	}
 
@@ -120,8 +120,12 @@ export const Calendar = () => {
 				<div className={style.calendar__header}>
 					<div className={style.info}>{months[currentMonth]} {currentYear}</div>
 					<div className={[style['calendar__header-control'], style['calendar__control']].join(' ')}>
-						<div className={style['calendar__control_left']} onClick={() => decrementMonth()}>left</div>
-						<div className={style['calendar__control_right']} onClick={() => incrementMonth()}>right</div>
+						<div className={style['calendar__control_left']} onClick={() => decrementMonth()}>
+							<GrFormPrevious size={20} />
+						</div>
+						<div className={style['calendar__control_right']} onClick={() => incrementMonth()}>
+							<GrFormNext size={20} />
+						</div>
 					</div>
 				</div>
 
@@ -141,6 +145,7 @@ export const Calendar = () => {
 									el?.day === activeData?.day && 
 									el?.year === activeData?.year &&
 									el?.month === activeData?.month ? style['calendar__days-activeDay'] : '',
+									el?.month !== currentMonth ? style['calendar__days-disabled'] : ''
 								].join(' ')} 
 								onClick={() => handleData(el)}
 							>

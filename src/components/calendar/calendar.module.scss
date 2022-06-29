@@ -56,6 +56,9 @@
 			border-radius: 50%;
 			height: auto;
 		}
+		&-disabled {
+			color: gray;
+		}
 	}
 
 	&__weekdays {
@@ -68,7 +71,4 @@
 			justify-content: center;
 		}
 	}
-
-	
-
 }
