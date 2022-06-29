@@ -4,12 +4,17 @@ import { GrFormNext, GrFormPrevious } from 'react-icons/gr';
 
 import style from './calendar.module.scss';
 
-export const Calendar = () => {
+export const Calendar = ({rangeMode}) => {
 
 	const [currentYear, setCurrentYear] = useState();
 	const [currentMonth, setCurrentMonth] = useState();
+	const [currentDate, setCurrentDate] = useState(new Date());
 	const [weekmonth, setWeekmonth] = useState([]);
 	const [activeData, setActiveData] = useState({});
+	const [range, setRange] = useState({
+		startDay: null,
+		endDay: null,
+	});
 
 	useEffect(() => {
 		const date = new Date();
@@ -68,9 +73,33 @@ export const Calendar = () => {
 		return new Date(year, month + 1, 0).getDate();
 	}
 
+	const getNewDate = (year, month, day) => {
+		return new Date(year, month, day);
+	}
+
 	useEffect(() => {
 		daysListComponent();
 	}, [currentYear, currentMonth])
+
+	/**
+		 * 
+		 * @param {Number} dayStart 
+		 * @param {Number} dayEnd 
+		 * @param {Number} month 
+		 * @param {Array} filledArray
+		 */
+	 const fillDaysArrow = async (dayStart, dayEnd, month, filledArray) => {
+		for (let i = dayStart; i <= dayEnd; i++) {
+			filledArray.push({
+				day: i,
+				month,
+				year: currentYear,
+				dayOfWeek: new Date(currentYear, month, i).getDay(),
+				disabled: month !== currentMonth ? 'true' : 'false',
+				info: new Date(currentYear, month, i)
+			});
+		}
+	}
 
 	const daysListComponent = async () => {
 		const days = getDays(currentYear, currentMonth);
@@ -78,39 +107,62 @@ export const Calendar = () => {
 
 		const countDaysCurrentMonth = new Date(currentYear, currentMonth, 1).getDay();
 
-		const fillDaysArrow = async (dayStart, dayEnd, month) => {
-			for (let i = dayStart; i <= dayEnd; i++) {
-				daysArray.push({
-					day: i,
-					month,
-					year: currentYear,
-					disabled: month !== currentMonth ? 'true' : 'false'
-				});
-			}
-		}
-
 		// загружаем предыдущий месяц
 		if (countDaysCurrentMonth !== 0) {
 			const countDaysPrevMonth = getDays(currentYear, currentMonth - 2);
 			let start = countDaysPrevMonth - (countDaysCurrentMonth - 2);
 
-			await fillDaysArrow(start, countDaysPrevMonth, currentMonth - 1)
+			await fillDaysArrow(start, countDaysPrevMonth, currentMonth - 1, daysArray)
 		}
 
 		// загружаем текущий месяц
-		await fillDaysArrow(1, days, currentMonth);
+		await fillDaysArrow(1, days, currentMonth, daysArray);
 
 		// загружаем следующий месяц
 		if (daysArray.length !== 41) {
 			let countDaysNextMonth = 42 - daysArray.length;
-			fillDaysArrow(1, countDaysNextMonth, currentMonth + 1);
+			fillDaysArrow(1, countDaysNextMonth, currentMonth + 1, daysArray);
 		}
 
 		setWeekmonth(daysArray);
 	}
 
-	const handleData = (e) => {
+	const handleRange = (e) => {
+		const {info} = e;
+
+		if (range.endDay !== null) {
+			setActiveData({});
+
+			return setRange({
+				startDay: null,
+				endDay: null,
+			})
+		}
+
+		if (range.startDay === null) {
+			
+			setRange({
+				...range,
+				startDay: info
+			})
+		} else {
+			setRange({
+				...range,
+				endDay:  info
+			})
+		}
+
 		setActiveData(e);
+	}
+
+	const handleData = async (e) => {
+		
+		if (rangeMode) {
+			handleRange(e);
+		} else {
+			setActiveData(e);
+		}
+		
 	}
 
 	return (
@@ -142,10 +194,13 @@ export const Calendar = () => {
 								key={uuidv4()} 
 								className={[
 									style['calendar__days-day'],
+									el?.month !== currentMonth ? style['calendar__days-disabled'] : '',
+									el?.dayOfWeek === (0) || el?.dayOfWeek === (6) ? style['calendar__days-red'] : '',
+									rangeMode && el?.info > range?.startDay && el?.info < range?.endDay ? style['calendar__days-ranged'] : '',
+									rangeMode && el?.info === range?.startDay ? style['calendar__days-activeDay'] : '',
 									el?.day === activeData?.day && 
 									el?.year === activeData?.year &&
 									el?.month === activeData?.month ? style['calendar__days-activeDay'] : '',
-									el?.month !== currentMonth ? style['calendar__days-disabled'] : ''
 								].join(' ')} 
 								onClick={() => handleData(el)}
 							>

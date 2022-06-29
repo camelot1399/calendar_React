@@ -5,7 +5,7 @@ function App() {
   return (
     <div className="App">
 		<div style={{width: 500}}>
-			<Calendar />
+			<Calendar rangeMode/>
 		</div>
     </div>
   );
