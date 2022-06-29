@@ -5,10 +5,19 @@ import style from './calendar.module.scss';
 
 export const Calendar = () => {
 
-	const [currentYear, setCurrentYear] = useState(2022);
-	const [currentMonth, setCurrentMonth] = useState(6);
+	const [currentYear, setCurrentYear] = useState();
+	const [currentMonth, setCurrentMonth] = useState();
 	const [weekmonth, setWeekmonth] = useState([]);
 	const [activeData, setActiveData] = useState({});
+
+	useEffect(() => {
+		const date = new Date();
+		const year = date.getFullYear();
+		const month = date.getMonth();
+
+		setCurrentMonth(month);
+		setCurrentYear(year);
+	}, []);
 
 	const months = [
 		'Январь',
@@ -54,8 +63,6 @@ export const Calendar = () => {
 		
 	}
 
-	console.log('dfsdf', new Date(2022, 6, 0).getDate());
-
 	const getDays = (year, month) => {
 		return new Date(year, month + 1, 0).getDate();
 	}
@@ -66,6 +73,7 @@ export const Calendar = () => {
 
 	const daysListComponent = async () => {
 		const days = getDays(currentYear, currentMonth);
+		console.log('days', days);
 		let daysArray = [];
 
 		const countDaysCurrentMonth = new Date(currentYear, currentMonth, 1).getDay();
@@ -94,15 +102,11 @@ export const Calendar = () => {
 		// загружаем следующий месяц
 		if (daysArray.length !== 41) {
 			let countDaysNextMonth = 42 - daysArray.length;
-			fillDaysArrow(1, countDaysNextMonth + 1, currentMonth + 1);
+			fillDaysArrow(1, countDaysNextMonth, currentMonth + 1);
 		}
 
 		setWeekmonth(daysArray);
 	}
-
-	useEffect(() => {
-		daysListComponent();
-	}, [])
 
 	const handleData = (e) => {
 		console.log('e', e);
@@ -114,7 +118,7 @@ export const Calendar = () => {
 			<div className={style.calendar__wrapper}>
 
 				<div className={style.calendar__header}>
-					<div className={style.info}>{months[currentMonth - 1]} {currentYear}</div>
+					<div className={style.info}>{months[currentMonth]} {currentYear}</div>
 					<div className={[style['calendar__header-control'], style['calendar__control']].join(' ')}>
 						<div className={style['calendar__control_left']} onClick={() => decrementMonth()}>left</div>
 						<div className={style['calendar__control_right']} onClick={() => incrementMonth()}>right</div>
